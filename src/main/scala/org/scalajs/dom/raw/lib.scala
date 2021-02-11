@@ -5904,22 +5904,42 @@ class Event(typeArg: String, init: js.UndefOr[EventInit] = js.undefined)
     extends js.Object {
 
   /**
-   * Returns the time (in milliseconds since the epoch) at which the event was created.
+   * A historical alias to Event.stopPropagation(). Setting its value to true before
+   * returning from an event handler prevents propagation of the event.
+   *
+   * MDN
+   */
+  var cancelBubble: Boolean = js.native
+
+  /**
+   * A historical property introduced by Internet Explorer and eventually adopted into
+   * the DOM specification in order to ensure existing sites continue to work. Ideally,
+   * you should try to use Event.preventDefault() and Event.defaultPrevented instead,
+   * but you can use returnValue if you choose to do so.
+   *
+   * MDN
+   */
+  @JSName("returnValue")
+  var _returnValue: Boolean = js.native
+
+  /**
+   * The time at which the event was created (in milliseconds). By specification, this
+   * value is time since epoch—but in reality, browsers' definitions vary. In addition,
+   * work is underway to change this to be a DOMHighResTimeStamp instead.
    *
    * MDN
    */
   def timeStamp: Double = js.native
 
   /**
-   * Returns a boolean indicating whether or not event.preventDefault() was called on
-   * the event.
+   * Indicates whether or not the call to event.preventDefault() canceled the event.
    *
    * MDN
    */
   def defaultPrevented: Boolean = js.native
 
   /**
-   * Indicates whether or not the event was initiated by the browser (after a user click
+   * Indicates whether or not the event was initiated by the browser (after a user click,
    * for instance) or by a script (using an event creation method, like
    * event.initEvent)
    *
@@ -5928,32 +5948,23 @@ class Event(typeArg: String, init: js.UndefOr[EventInit] = js.undefined)
   def isTrusted: Boolean = js.native
 
   /**
-   * Identifies the current target for the event, as the event traverses the DOM. It
-   * always refers to the element the event handler has been attached to as opposed to
-   * event.target which identifies the element on which the event occurred.
+   * A reference to the currently registered target for the event. This is the object to
+   * which the event is currently slated to be sent. It's possible this has been changed
+   * along the way through retargeting.
    *
    * MDN
    */
   def currentTarget: EventTarget = js.native
 
   /**
-   * A boolean indicating whether the bubbling of the event has been canceled or not.
-   *
-   * MDN
-   */
-  def cancelBubble: Boolean = js.native
-
-  /**
-   * This property of event objects is the object the event was dispatched on. It is
-   * different than event.currentTarget when the event handler is called in bubbling
-   * or capturing phase of the event.
+   * A reference to the target to which the event was originally dispatched.
    *
    * MDN
    */
   def target: EventTarget = js.native
 
   /**
-   * Indicates which phase of the event flow is currently being evaluated.
+   * Indicates which phase of the event flow is being processed.
    *
    * MDN
    */
@@ -5966,14 +5977,36 @@ class Event(typeArg: String, init: js.UndefOr[EventInit] = js.undefined)
    */
   def cancelable: Boolean = js.native
 
+  /**
+   * The name of the event. Case-insensitive.
+   *
+   * MDN
+   */
   def `type`: String = js.native
 
   /**
-   * A boolean indicating whether the event bubbles up through the DOM or not.
+   * A boolean indicating whether or not the event bubbles up through the DOM.
    *
    * MDN
    */
   def bubbles: Boolean = js.native
+
+  /**
+   * A boolean indicating whether or not the event can bubble across the boundary
+   * between the shadow DOM and the regular DOM.
+   *
+   * MDN
+   */
+  def composed: Boolean = js.native
+
+  /**
+   * Returns the event’s path (objects on which listeners will be invoked).
+   * This does not include nodes in shadow trees if the shadow root was created with
+   * its ShadowRoot.mode closed.
+   *
+   * MDN
+   */
+  def composedPath(): js.Array[EventTarget] = js.native
 
   /**
    * Stops the propagation of events further along in the DOM.
@@ -6003,10 +6036,41 @@ class Event(typeArg: String, init: js.UndefOr[EventInit] = js.undefined)
 @js.native
 @JSGlobal
 object Event extends js.Object {
+  /**
+   * No event is being processed at this time.
+   *
+   * MDN
+   */
+  def NONE: Int = js.native
+
+  /**
+   * The event is being propagated through the target's ancestor objects. This process
+   * starts with the Window, then Document, then the HTMLHtmlElement, and so on through
+   * the elements until the target's parent is reached. Event listeners registered for
+   * capture mode when EventTarget.addEventListener() was called are triggered during
+   * this phase.
+   *
+   * MDN
+   */
   def CAPTURING_PHASE: Int = js.native
 
+  /**
+   * The event has arrived at the event's target. Event listeners registered for this
+   * phase are called at this time. If Event.bubbles is false, processing the event is
+   * finished after this phase is complete.
+   *
+   * MDN
+   */
   def AT_TARGET: Int = js.native
 
+  /**
+   * The event is propagating back up through the target's ancestors in reverse order,
+   * starting with the parent, and eventually reaching the containing Window. This is
+   * known as bubbling, and occurs only if Event.bubbles is true. Event listeners
+   * registered for this phase are triggered during this process.
+   *
+   * MDN
+   */
   def BUBBLING_PHASE: Int = js.native
 }
 
